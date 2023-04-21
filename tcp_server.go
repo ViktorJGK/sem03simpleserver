@@ -5,6 +5,9 @@ import (
 	"log"
 	"net"
 	"sync"
+	"fmt"
+	"strconv"
+	"strings"
 	"github.com/ViktorJGK/is105sem03/mycrypt"
 	"github.com/ViktorJGK/funtemps/conv"
 )
@@ -48,8 +51,12 @@ func main() {
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 					case "Kjevik":
-						fahrenheit := conv.ConvertToCelsius(celsius)
-						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahrenheit)), mycrypt.ALF_SEM03, 4)
+						input := strings.Split(msg, ";")
+						if len(input) == 5 {
+							temperature, err := strconv.ParseFloat(input[4], 64)
+						}
+						fahr := conv.CelsiusToFahrenheit(temperature)
+						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahr)), mycrypt.ALF_SEM03, 4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 
