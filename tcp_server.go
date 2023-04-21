@@ -1,15 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
-	"sync"
-	"fmt"
 	"strconv"
 	"strings"
-	"github.com/ViktorJGK/is105sem03/mycrypt"
+	"sync"
+
 	"github.com/ViktorJGK/funtemps/conv"
+	"github.com/ViktorJGK/is105sem03/mycrypt"
 )
 
 func main() {
@@ -45,8 +46,8 @@ func main() {
 					dekryptertMelding := mycrypt.Krypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
 					log.Println("Dekrypter melding: ", string(dekryptertMelding))
 					switch msg := string(dekryptertMelding); msg {
-                                        //log.Println(msg)
-  				        case "ping":
+					//log.Println(msg)
+					case "ping":
 						kryptertMelding := mycrypt.Krypter([]rune("pong"), mycrypt.ALF_SEM03, 4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
@@ -54,12 +55,15 @@ func main() {
 						input := strings.Split(msg, ";")
 						if len(input) == 5 {
 							temperature, err := strconv.ParseFloat(input[4], 64)
+							if err != nil {
+								log.Println("feil ved parsing av temp: ", err)
+								return
+							}
+							fahr := conv.CelsiusToFahrenheit(temperature)
+							kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahr)), mycrypt.ALF_SEM03, 4)
+							log.Println("Kryptert melding: ", string(kryptertMelding))
+							_, err = conn.Write([]byte(string(kryptertMelding)))
 						}
-						fahr := conv.CelsiusToFahrenheit(temperature)
-						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahr)), mycrypt.ALF_SEM03, 4)
-						log.Println("Kryptert melding: ", string(kryptertMelding))
-						_, err = conn.Write([]byte(string(kryptertMelding)))
-
 					default:
 						_, err = c.Write(buf[:n])
 					}
