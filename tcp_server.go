@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 	"github.com/ViktorJGK/is105sem03/mycrypt"
+	"github.com/ViktorJGK/funtemps/conv"
 )
 
 func main() {
@@ -43,7 +44,15 @@ func main() {
 					switch msg := string(dekryptertMelding); msg {
                                         //log.Println(msg)
   				        case "ping":
-						_, err = c.Write([]byte("pong"))
+						kryptertMelding := mycrypt.Krypter([]rune("pong"), mycrypt.ALF_SEM03, 4)
+						log.Println("Kryptert melding: ", string(kryptertMelding))
+						_, err = conn.Write([]byte(string(kryptertMelding)))
+					case "Kjevik":
+						fahrenheit := conv.ConvertToCelsius(celsius)
+						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahrenheit)), mycrypt.ALF_SEM03, 4)
+						log.Println("Kryptert melding: ", string(kryptertMelding))
+						_, err = conn.Write([]byte(string(kryptertMelding)))
+
 					default:
 						_, err = c.Write(buf[:n])
 					}
