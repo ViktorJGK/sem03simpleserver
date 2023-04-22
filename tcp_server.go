@@ -1,16 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/ViktorJGK/is105sem03/mycrypt"
+	"github.com/ViktorJGK/minyr/yr"
 	"io"
 	"log"
 	"net"
-	"strconv"
-	"strings"
+	"os"
 	"sync"
-
-	"github.com/ViktorJGK/funtemps/conv"
-	"github.com/ViktorJGK/is105sem03/mycrypt"
 )
 
 func main() {
@@ -52,16 +51,11 @@ func main() {
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 					case "Kjevik":
-						elementer := strings.Split(msg, ";")
-						if len(elementer) >= 4 {
-							fahrenheit, err := strconv.ParseFloat(elementer[3], 64)
-							if err == nil {
-								fahrenheit = conv.CelsiusToFahrenheit(fahrenheit)
-								elementer[3] = fmt.Sprintf("%.2f", fahrenheit)
-							}
-						}
-						sammensattLinje := strings.Join(elementer, ";")
-						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %s", sammensattLinje)), mycrypt.ALF_SEM03, 4)
+						scanner := bufio.NewScanner(os.Stdin)
+						line := scanner.Text()
+						var lines []string
+						convertedLine, err := yr.CelsiusToFahrenheitLine(line)
+						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf(line)), mycrypt.ALF_SEM03, 4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 
