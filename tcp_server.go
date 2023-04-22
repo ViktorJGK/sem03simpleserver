@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -48,28 +49,29 @@ func main() {
 						kryptertMelding := mycrypt.Krypter([]rune("pong"), mycrypt.ALF_SEM03, 4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
-					case "Kjevik":
-						convertedLine, err := yr.CelsiusToFahrenheitLine(msg)
-						if err != nil {
-							log.Println("Error converting temperature:", err)
-							return // or handle the error as appropriate for your use case
-						}
-						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf(convertedLine)), mycrypt.ALF_SEM03, 4)
-						log.Println("Kryptert melding: ", string(kryptertMelding))
-						_, err = conn.Write([]byte(string(kryptertMelding)))
-						if err != nil {
-							log.Println("Error writing to connection:", err)
-							return
-						}
-
 					default:
-						_, err = c.Write(buf[:n])
-					}
-					if err != nil {
-						if err != io.EOF {
-							log.Println(err)
+						if strings.HasPrefix(msg, "Kjevik") {
+							convertedLine, err := yr.CelsiusToFahrenheitLine(msg)
+							if err != nil {
+								log.Println("Error converting temperature:", err)
+								return // or handle the error as appropriate for your use case
+							}
+							kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf(convertedLine)), mycrypt.ALF_SEM03, 4)
+							log.Println("Kryptert melding: ", string(kryptertMelding))
+							_, err = conn.Write([]byte(string(kryptertMelding)))
+							if err != nil {
+								log.Println("Error writing to connection:", err)
+								return
+							}
+						} else {
+							_, err = c.Write(buf[:n])
 						}
-						return // fra for løkke
+						if err != nil {
+							if err != io.EOF {
+								log.Println(err)
+							}
+							return // fra for løkke
+						}
 					}
 				}
 			}(conn)
