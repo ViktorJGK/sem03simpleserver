@@ -52,18 +52,19 @@ func main() {
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 					case "Kjevik":
-						input := strings.Split(msg, ";")
-						if len(input) == 5 {
-							temperature, err := strconv.ParseFloat(input[4], 64)
-							if err != nil {
-								log.Println("feil ved parsing av temp: ", err)
-								return
+						elementer := strings.Split(msg, ":")
+						if len(elementer) >= 4 {
+							fahrenheit, err := strconv.ParseFloat(elementer[3], 64)
+							if err == nil {
+								fahrenheit = conv.CelsiusToFahrenheit(fahrenheit)
+								elementer[3] = fmt.Sprintf("%.2f", fahrenheit)
 							}
-							fahr := conv.CelsiusToFahrenheit(temperature)
-							kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %.2f", fahr)), mycrypt.ALF_SEM03, 4)
-							log.Println("Kryptert melding: ", string(kryptertMelding))
-							_, err = conn.Write([]byte(string(kryptertMelding)))
 						}
+						sammensattLinje := strings.Join(elementer, ":")
+						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf("Temperaturen i Fahrenheit er: %s", sammensattLinje)), mycrypt.ALF_SEM03, 4)
+						log.Println("Kryptert melding: ", string(kryptertMelding))
+						_, err = conn.Write([]byte(string(kryptertMelding)))
+
 					default:
 						_, err = c.Write(buf[:n])
 					}
