@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/ViktorJGK/is105sem03/mycrypt"
 	"github.com/ViktorJGK/minyr/yr"
 	"io"
 	"log"
 	"net"
-	"os"
 	"sync"
 )
 
@@ -51,13 +49,18 @@ func main() {
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
 					case "Kjevik":
-						scanner := bufio.NewScanner(os.Stdin)
-						line := scanner.Text()
-						var lines []string
-						convertedLine, err := yr.CelsiusToFahrenheitLine(line)
-						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf(line)), mycrypt.ALF_SEM03, 4)
+						convertedLine, err := yr.CelsiusToFahrenheitLine(msg)
+						if err != nil {
+							log.Println("Error converting temperature:", err)
+							return // or handle the error as appropriate for your use case
+						}
+						kryptertMelding := mycrypt.Krypter([]rune(fmt.Sprintf(convertedLine)), mycrypt.ALF_SEM03, 4)
 						log.Println("Kryptert melding: ", string(kryptertMelding))
 						_, err = conn.Write([]byte(string(kryptertMelding)))
+						if err != nil {
+							log.Println("Error writing to connection:", err)
+							return
+						}
 
 					default:
 						_, err = c.Write(buf[:n])
